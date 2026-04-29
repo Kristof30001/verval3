@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -28,11 +30,9 @@ jobs:
           DOTNET_CLI_TELEMETRY_OPTOUT: "1"
 
       - name: SonarCloud - begin analysis
-        if: ${{ secrets.SONAR_TOKEN }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        if: ${{ env.SONAR_TOKEN != '' }}
         run: |
-          $RUNNER_TEMP/scanner/dotnet-sonarscanner begin /k:"Kristof30001_verval3" /o:"kristof30001" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          $RUNNER_TEMP/scanner/dotnet-sonarscanner begin /k:"Kristof30001_verval3" /o:"kristof30001" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$SONAR_TOKEN"
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -61,8 +61,6 @@ jobs:
           path: coveragereport/
 
       - name: SonarCloud - end analysis
-        if: ${{ secrets.SONAR_TOKEN }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        if: ${{ env.SONAR_TOKEN != '' }}
         run: |
-          $RUNNER_TEMP/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          $RUNNER_TEMP/scanner/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
