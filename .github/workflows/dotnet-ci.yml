@@ -1,0 +1,41 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore VerVal.sln
+
+      - name: Build
+        run: dotnet build VerVal.sln --no-restore --configuration Debug
+
+      - name: Test and collect coverage
+        run: dotnet test VerVal.sln --no-build --configuration Debug --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate HTML Report
+        run: reportgenerator -reports:./coverage/**/*.cobertura.xml -targetdir:./coveragereport -reporttypes:Html
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: coveragereport/
