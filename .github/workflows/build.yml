@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17 (required for Sonar scanner)
         uses: actions/setup-java@v4
@@ -32,7 +34,7 @@ jobs:
       - name: SonarCloud - begin analysis
         if: ${{ env.SONAR_TOKEN != '' }}
         run: |
-          $RUNNER_TEMP/scanner/dotnet-sonarscanner begin /k:"Kristof30001_verval3" /o:"kristof30001" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$SONAR_TOKEN"
+          $RUNNER_TEMP/scanner/dotnet-sonarscanner begin /k:"Kristof30001_verval3" /o:"kristof30001" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="$SONAR_TOKEN" /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml"
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -63,4 +65,4 @@ jobs:
       - name: SonarCloud - end analysis
         if: ${{ env.SONAR_TOKEN != '' }}
         run: |
-          $RUNNER_TEMP/scanner/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+          $RUNNER_TEMP/scanner/dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
